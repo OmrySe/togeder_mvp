@@ -2,36 +2,216 @@
     display: flex;
     flex-direction: column;
     height: 100vh;
-    overflow-y: auto;
-    overflow-x: hidden;
-    padding: 1rem;
+    background-color: #f8f5ff;
+    color: #4a0e78;
+    font-family: 'Arial', sans-serif;
+    overflow-y: auto; /* Add this line to enable scrolling for the entire component */
+}
+
+.InMeeting header {
+    background-color: #ffffff;
+    padding: 0rem;
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
 }
 
 .InMeeting h1 {
+    font-size: 2rem;
     text-align: center;
-    font-size: 1.5rem;
-    font-weight: 300;
 }
 
-.InMeeting-record {
-    text-align: center;
+.InMeeting h1 .black-text {
+    color: #000000;
+}
+
+.InMeeting h1 .purple-text {
+    color: #6a1b9a;
+    font-weight: bold;
+}
+
+.InMeeting-content {
+    display: flex;
+    flex-grow: 1;
+    padding: 1rem;
+    overflow: visible; /* Change this from 'hidden' to 'visible' */
+}
+
+.InMeeting-transcripts, .InMeeting-summary {
+    flex: 1;
+    background-color: #ffffff;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    padding: 1rem;
+    margin: 0 0.5rem;
+    overflow-y: auto; /* Add this line to enable vertical scrolling */
+    max-height: none; /* Remove the max-height restriction */
+}
+
+.InMeeting-transcripts h2, .InMeeting-summary h2 {
+    margin-top: 0;
+    color: #4a0e78;
+    border-bottom: 2px solid #d1c4e9;
+    padding-bottom: 0.5rem;
+}
+
+.bot-transcript {
     margin-bottom: 1rem;
 }
 
-.InMeeting button {
-    margin: 0 auto;
-    padding: 0.5rem 1rem;
-    border: 1px solid #4192a8;
-    border-radius: 0.25rem;
-    background-color: #4192a8;
-    color: #fff;
-    font-size: 1rem;
-    font-weight: 300;
-    cursor: pointer;
-    width: 100%;
+.bot-transcript h3 {
+    color: #6a1b9a;
 }
 
-.InMeeting button:disabled {
-    opacity: 0.5;
+.bot-transcript pre {
+    background-color: #f3e5f5;
+    padding: 0.5rem;
+    border-radius: 4px;
+    white-space: pre-wrap;
+    word-wrap: break-word;
+    max-height: 200px; /* Add this line to limit the height of each transcript */
+    overflow-y: auto; /* Add this line to enable vertical scrolling for each transcript */
+}
+
+.InMeeting-controls {
+    display: flex;
+    flex-direction: column;
+    padding: 1rem;
+    background-color: #ede7f6;
+    border-bottom: 1px solid #d1c4e9;
+}
+
+.InMeeting-controls-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1rem;
+    font-size: 0.9rem;
+}
+
+.bot-control {
+    display: flex;
+    align-items: center;
+}
+
+.bot-control label {
+    margin-right: 0.5rem;
+    font-weight: bold;
+}
+
+.bot-control input {
+    width: 3rem;
+    padding: 0.25rem;
+    border: 1px solid #b39ddb;
+    border-radius: 4px;
+    font-size: 0.9rem;
+}
+
+.button-group {
+    display: flex;
+    gap: 1rem;
+}
+
+button {
+    background-color: #7e57c2;
+    color: #ffffff;
+    border: none;
+    padding: 0.5rem 1rem;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+button:hover:not(:disabled) {
+    background-color: #5e35b1;
+}
+
+button:disabled {
+    background-color: #d1c4e9;
     cursor: not-allowed;
+}
+
+.add-bots-button {
+    background-color: #4a148c;
+}
+
+.stop-recording-button {
+    background-color: #8e24aa;
+}
+
+.InMeeting-content {
+    display: flex;
+    flex-grow: 1;
+    padding: 1rem;
+    overflow-y: auto;
+}
+
+.InMeeting-transcripts, .InMeeting-summary {
+    flex: 1;
+    background-color: #ffffff;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    padding: 1rem;
+    margin: 0 0.5rem;
+    overflow-y: auto;
+}
+
+.InMeeting-transcripts h2, .InMeeting-summary h2 {
+    margin-top: 0;
+    color: #4a0e78;
+    border-bottom: 2px solid #d1c4e9;
+    padding-bottom: 0.5rem;
+}
+
+.bot-transcript {
+    margin-bottom: 1rem;
+}
+
+.bot-transcript h3 {
+    color: #6a1b9a;
+}
+
+.bot-transcript pre {
+    background-color: #f3e5f5;
+    padding: 0.5rem;
+    border-radius: 4px;
+    white-space: pre-wrap;
+    word-wrap: break-word;
+}
+
+.InMeeting-summary select, .InMeeting-summary input {
+    width: 100%;
+    margin-bottom: 1rem;
+    padding: 0.5rem;
+    border: 1px solid #b39ddb;
+    border-radius: 4px;
+}
+
+.InMeeting-summary-text {
+    background-color: #f3e5f5;
+    padding: 1rem;
+    border-radius: 4px;
+    margin-top: 1rem;
+    max-height: 200px;
+    overflow-y: auto;
+}
+
+/* Add these new styles */
+.bot-data {
+    margin-bottom: 1rem;
+    padding: 1rem;
+    background-color: #ffffff;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    text-align: center; /* Add this line to center the content */
+}
+
+.bot-transcript, .bot-summary {
+    max-height: 300px; /* Adjust this value as needed */
+    overflow-y: auto;
+    margin-top: 1rem;
+}
+
+.toggle-transcript-button {
+    display: block;
+    margin: 0 auto;
+    margin-bottom: 1rem;
 }

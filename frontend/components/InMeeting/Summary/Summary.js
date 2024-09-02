@@ -1,28 +1,20 @@
 import React, { useState } from 'react';
+import PropTypes from 'prop-types';
 import './Summary.css';
-import appFetch from '../../../helpers/fetch';
 
-/* eslint react/prop-types: 0 */
-export const Summary = ({ transcript }) => {
+export const Summary = ({ transcript = [], botId, onSummarize }) => {
     const [summaryState, setSummaryState] = useState('none');
     const [prompt, setPrompt] = useState('general_summary');
-    const [summary, setSummary] = useState();
+    const [summary, setSummary] = useState('');
 
     const generateSummary = async () => {
         setSummaryState('summarising');
-
-        const res = await appFetch('/api/summarize', {
-            method: 'POST',
-            body: JSON.stringify({
-                prompt,
-            }),
-        });
-
-        if (res.status < 299) {
-            const data = await res.json();
+        try {
+            const newSummary = await onSummarize(botId, prompt);
+            setSummary(newSummary);
             setSummaryState('none');
-            setSummary(data.summary);
-        } else {
+        } catch (error) {
+            console.error('Error generating summary:', error);
             setSummaryState('error');
         }
     };
@@ -45,12 +37,18 @@ export const Summary = ({ transcript }) => {
                     ['summarising', 'error'].includes(summaryState)
                 }
             >
-                {summaryState === 'none' && 'Ask Claude'}
+                {summaryState === 'none' && 'Ask AI'}
                 {summaryState === 'summarising' && 'Thinking...'}
                 {summaryState === 'error' && 'An Error Occurred'}
             </button>
         </div>
     );
+};
+
+Summary.propTypes = {
+    transcript: PropTypes.array,
+    botId: PropTypes.string.isRequired,
+    onSummarize: PropTypes.func.isRequired,
 };
 
 export default Summary;

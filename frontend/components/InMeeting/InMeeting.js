@@ -7,30 +7,28 @@ import Summary from './Summary/Summary';
 
 function InMeeting() {
     const [recordingState, setRecordingState] = useState('stopped');
-    const [transcript, setTranscript] = useState([]);
+    const [botCount, setBotCount] = useState(1);
+    const [botData, setBotData] = useState([]);
+    const [totalBots, setTotalBots] = useState(0);
+    const [expandedBots, setExpandedBots] = useState({});
 
-    const toggleRecording = async () => {
-        if (recordingState === 'stopped') {
-            await startRecording();
-        } else {
-            await stopRecording();
-        }
-    };
-
-    const startRecording = async () => {
+    const addBots = async () => {
         setRecordingState('starting');
-
-        // @see https://appssdk.zoom.us/types/ZoomSdkTypes.GetMeetingJoinUrlResponse.html
         const meetingUrl = await zoomSdk.getMeetingJoinUrl();
-        const res = await appFetch('/api/start-recording', {
+        const res = await appFetch('/api/add-bots', {
             method: 'POST',
             body: JSON.stringify({
                 meetingUrl: meetingUrl.joinUrl,
+                botCount: botCount,
+                totalBots: totalBots,
             }),
         });
 
         if (res.status <= 299) {
-            setRecordingState('bot-joining');
+            const data = await res.json();
+            setBotData((prevBotData) => [...prevBotData, ...data.bots]);
+            setTotalBots(data.totalBots);
+            setRecordingState('recording');
         } else {
             setRecordingState('error');
         }
@@ -41,92 +39,161 @@ function InMeeting() {
         const res = await appFetch('/api/stop-recording', { method: 'POST' });
 
         if (res.status <= 299) {
-            setRecordingState('bot-leaving');
+            setRecordingState('stopped');
+            setBotData([]);
+            setTotalBots(0);
         } else {
             setRecordingState('error');
         }
     };
 
     const refreshState = async () => {
-        if (recordingState === 'starting' || recordingState === 'stopping') {
-            return;
-        }
-
-        const res = await appFetch('/api/recording-state', {
-            method: 'GET',
-        });
+        const res = await appFetch('/api/recording-state', { method: 'GET' });
 
         if (res.status === 400) {
             setRecordingState('stopped');
             return;
         }
 
-        const { state, transcript } = await res.json();
-
-        if (state === 'in_call_not_recording') {
-            setRecordingState('waiting');
-        } else if (
-            state === 'in_call_recording' &&
-            recordingState !== 'bot-leaving'
-        ) {
-            setRecordingState('recording');
-        } else if (state === 'call_ended') {
-            setRecordingState('bot-leaving');
-        } else if (state === 'fatal') {
-            setRecordingState('error');
-        } else if (state === 'done') {
-            setRecordingState('stopped');
-        }
-
-        setTranscript(transcript);
+        const { state, bots } = await res.json();
+        console.log('Received state:', state);
+        console.log('Received bots data:', JSON.stringify(bots, null, 2));
+        setRecordingState(state);
+        setBotData(bots);
     };
 
     useEffect(() => {
         refreshState();
+        const interval = setInterval(refreshState, 5000);
+        return () => clearInterval(interval);
     }, []);
 
-    useEffect(() => {
-        const interval = setInterval(refreshState, 2000);
+    const toggleBotExpansion = (botId) => {
+        setExpandedBots((prev) => ({
+            ...prev,
+            [botId]: !prev[botId],
+        }));
+    };
 
-        return () => clearInterval(interval);
-    }, [recordingState]);
+    const summarizeTranscript = async (botId, prompt) => {
+        const res = await appFetch('/api/summarize', {
+            method: 'POST',
+            body: JSON.stringify({
+                botId: botId,
+                prompt: prompt,
+            }),
+        });
+
+        if (res.status <= 299) {
+            const data = await res.json();
+            setBotData((prevBotData) =>
+                prevBotData.map((bot) =>
+                    bot.id === botId ? { ...bot, summary: data.summary } : bot
+                )
+            );
+            return data.summary;
+        } else {
+            throw new Error('Failed to generate summary');
+        }
+    };
+
+    const clearBots = async () => {
+        const res = await appFetch('/api/clear-bots', { method: 'POST' });
+        if (res.status <= 299) {
+            setBotData([]);
+            setTotalBots(0);
+        }
+    };
 
     return (
         <div className="InMeeting">
             <header>
-                <h1>Your Notetaker</h1>
+                <h1>
+                    <span className="black-text">tog</span>
+                    <span className="purple-text">ED</span>
+                    <span className="black-text">er</span>
+                </h1>
             </header>
 
-            <h3>Meeting Transcript</h3>
-            <Transcript transcript={transcript} />
-
-            <div className="InMeeting-record">
+            <div className="InMeeting-controls">
+                <div className="bot-control">
+                    <label htmlFor="botCount">Number of Bots to Add:</label>
+                    <input
+                        id="botCount"
+                        type="number"
+                        min="1"
+                        max="10"
+                        value={botCount}
+                        onChange={(e) => setBotCount(parseInt(e.target.value))}
+                    />
+                </div>
                 <button
-                    onClick={toggleRecording}
-                    disabled={[
-                        'starting',
-                        'bot-joining',
-                        'waiting',
-                        'stopping',
-                        'bot-leaving',
-                        'error',
-                    ].includes(recordingState)}
+                    className="add-bots-button"
+                    onClick={addBots}
+                    disabled={recordingState !== 'stopped'}
                 >
-                    {recordingState === 'stopped' && 'Start Recording'}
-                    {recordingState === 'recording' && 'Stop Recording'}
-                    {(recordingState === 'starting' ||
-                        recordingState === 'bot-joining') &&
-                        'Starting...'}
-                    {(recordingState === 'stopping' ||
-                        recordingState === 'bot-leaving') &&
-                        'Stopping...'}
-                    {recordingState === 'waiting' &&
-                        'Waiting for permission...'}
-                    {recordingState === 'error' && 'An error occurred'}
+                    Add Bots
                 </button>
+                <button
+                    className="stop-recording-button"
+                    onClick={stopRecording}
+                    disabled={recordingState !== 'recording'}
+                >
+                    Stop Recording
+                </button>
+                <div>Total Bots: {totalBots}</div>
+                <div>Recording State: {recordingState}</div>
+                <button onClick={clearBots}>Clear All Bots</button>
             </div>
 
-            <Summary transcript={transcript} />
+            {botData.map((bot, index) => (
+                <div key={bot.id} className="bot-data">
+                    <h3>Bot {index + 1}</h3>
+                    <button
+                        className="toggle-transcript-button"
+                        onClick={() => toggleBotExpansion(bot.id)}
+                    >
+                        {expandedBots[bot.id] ? 'Hide' : 'Show'} Transcript and
+                        Summary
+                    </button>
+                    {expandedBots[bot.id] && (
+                        <>
+                            <h4>Transcript</h4>
+                            <div className="bot-transcript">
+                                <Transcript transcript={bot.transcript} />
+                            </div>
+                            <h4>Summary</h4>
+                            <div className="bot-summary">
+                                <Summary
+                                    transcript={bot.transcript}
+                                    botId={bot.id}
+                                    onSummarize={summarizeTranscript}
+                                />
+                            </div>
+                            <h4>Participants</h4>
+                            <div className="bot-participants">
+                                {bot.participants &&
+                                bot.participants.length > 0 ? (
+                                    <ul>
+                                        {bot.participants.map((p) => (
+                                            <li key={p.id}>
+                                                {p.name}{' '}
+                                                {p.isHost ? '(Host)' : ''}:{' '}
+                                                {Math.round(
+                                                    p.talkTimePercentage
+                                                )}
+                                                %
+                                            </li>
+                                        ))}
+                                    </ul>
+                                ) : (
+                                    <p>No participants data available</p>
+                                )}
+                            </div>
+                        </>
+                    )}
+                </div>
+            ))}
         </div>
     );
 }

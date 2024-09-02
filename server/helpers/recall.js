@@ -4,7 +4,7 @@ import _ from 'lodash';
 
 export async function recallFetch(path, options) {
     const res = await fetch(
-        `https://api.recall.ai${path}`,
+        `https://us-west-2.recall.ai${path}`,
         _.defaultsDeep(
             {
                 headers: {
