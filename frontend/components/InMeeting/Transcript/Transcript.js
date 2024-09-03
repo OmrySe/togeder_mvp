@@ -25,7 +25,7 @@ export const Transcript = ({ transcript }) => {
     }
 
     useEffect(() => {
-        // scroll to bottom
+        // Scroll to bottom whenever transcript changes
         if (ref.current) {
             ref.current.scrollTop = ref.current.scrollHeight;
         }

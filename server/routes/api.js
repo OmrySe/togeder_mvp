@@ -147,7 +147,9 @@ router.post('/add-bots', session, async (req, res, next) => {
                     bot_name: `${process.env.BOT_NAME} # ${botNumber}`,
                     meeting_url: req.body.meetingUrl,
                     transcription_options: {
-                        provider: 'default',
+                        provider: 'gladia',
+                        detect_language: false,
+                        language: 'he',
                     },
                     real_time_transcription: {
                         destination_url: `${zoomApp.publicUrl}/webhook/transcription?secret=${zoomApp.webhookSecret}`,
@@ -288,7 +290,7 @@ Human: <transcript>
 {{transcript}}
 Human: </transcript>
 
-Human: Only answer the following question directly, do not add any additional comments or information.
+Human: Only answer the following question directly, do not add any additional comments or information. if the trancript is in hebrew, answer in hebrew.
 Human: {{prompt}}
 
 Assistant:`,
@@ -329,17 +331,17 @@ router.post('/summarize', session, async (req, res, next) => {
 
         console.log('completePrompt', completePrompt);
 
-        const data = await anthropicFetch('/v1/complete', {
+        const data = await anthropicFetch('/v1/messages', {
             method: 'POST',
             body: JSON.stringify({
-                model: 'claude-2',
-                prompt: completePrompt,
-                max_tokens_to_sample: 1024,
+                model: 'claude-3-5-sonnet-20240620',
+                max_tokens: 1024,
+                messages: [{ role: 'user', content: completePrompt }],
             }),
         });
 
         return res.json({
-            summary: data.completion,
+            summary: data.content[0].text,
         });
     } catch (e) {
         next(handleError(e));
@@ -356,6 +358,37 @@ router.post('/clear-bots', session, async (req, res, next) => {
         req.session.botIds = [];
 
         res.json({ success: true });
+    } catch (e) {
+        next(handleError(e));
+    }
+});
+
+router.post('/reset-bots', session, async (req, res, next) => {
+    try {
+        sanitize(req);
+        validateAppContext(req);
+
+        // Reset bot data but keep the bot entries
+        for (let botId in db.transcripts) {
+            db.transcripts[botId] = [];
+        }
+        for (let botId in db.participants) {
+            db.participants[botId] = [];
+        }
+        for (let botId in db.talkTime) {
+            db.talkTime[botId] = {};
+        }
+
+        // Fetch the updated bot data
+        const botIds = req.session.botIds || [];
+        const bots = botIds.map((id) => ({
+            id,
+            transcript: db.transcripts[id] || [],
+            participants: db.participants[id] || [],
+            talkTime: db.talkTime[id] || {},
+        }));
+
+        return res.json({ success: true, bots });
     } catch (e) {
         next(handleError(e));
     }

@@ -105,6 +105,15 @@ function InMeeting() {
         }
     };
 
+    const resetBots = async () => {
+        const res = await appFetch('/api/reset-bots', { method: 'POST' });
+        if (res.status <= 299) {
+            const data = await res.json();
+            setBotData(data.bots);
+            setRecordingState('stopped');
+        }
+    };
+
     return (
         <div className="InMeeting">
             <header>
@@ -144,6 +153,7 @@ function InMeeting() {
                 <div>Total Bots: {totalBots}</div>
                 <div>Recording State: {recordingState}</div>
                 <button onClick={clearBots}>Clear All Bots</button>
+                <button onClick={resetBots}>Reset All Bots</button>
             </div>
 
             {botData.map((bot, index) => (
@@ -170,24 +180,28 @@ function InMeeting() {
                                     onSummarize={summarizeTranscript}
                                 />
                             </div>
-                            <h4>Participants</h4>
+                            <h4>Active Participants</h4>
                             <div className="bot-participants">
                                 {bot.participants &&
                                 bot.participants.length > 0 ? (
                                     <ul>
-                                        {bot.participants.map((p) => (
-                                            <li key={p.id}>
-                                                {p.name}{' '}
-                                                {p.isHost ? '(Host)' : ''}:{' '}
-                                                {Math.round(
-                                                    p.talkTimePercentage
-                                                )}
-                                                %
-                                            </li>
-                                        ))}
+                                        {bot.participants
+                                            .filter(
+                                                (p) => p.talkTimePercentage > 0
+                                            )
+                                            .map((p) => (
+                                                <li key={p.id}>
+                                                    {p.name}{' '}
+                                                    {p.isHost ? '(Host)' : ''}:{' '}
+                                                    {Math.round(
+                                                        p.talkTimePercentage
+                                                    )}
+                                                    %
+                                                </li>
+                                            ))}
                                     </ul>
                                 ) : (
-                                    <p>No participants data available</p>
+                                    <p>No active participants</p>
                                 )}
                             </div>
                         </>
