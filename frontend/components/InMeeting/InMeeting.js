@@ -159,6 +159,23 @@ function InMeeting() {
             {botData.map((bot, index) => (
                 <div key={bot.id} className="bot-data">
                     <h3>Bot {index + 1}</h3>
+                    <h4>Active Participants</h4>
+                    <div className="bot-participants">
+                        {bot.participants && bot.participants.length > 0 ? (
+                            <ul>
+                                {bot.participants
+                                    .filter((p) => p.talkTimePercentage > 0)
+                                    .map((p) => (
+                                        <li key={p.id}>
+                                            {p.name} {p.isHost ? '(Host)' : ''}:{' '}
+                                            {Math.round(p.talkTimePercentage)}%
+                                        </li>
+                                    ))}
+                            </ul>
+                        ) : (
+                            <p>No active participants</p>
+                        )}
+                    </div>
                     <button
                         className="toggle-transcript-button"
                         onClick={() => toggleBotExpansion(bot.id)}
@@ -179,30 +196,6 @@ function InMeeting() {
                                     botId={bot.id}
                                     onSummarize={summarizeTranscript}
                                 />
-                            </div>
-                            <h4>Active Participants</h4>
-                            <div className="bot-participants">
-                                {bot.participants &&
-                                bot.participants.length > 0 ? (
-                                    <ul>
-                                        {bot.participants
-                                            .filter(
-                                                (p) => p.talkTimePercentage > 0
-                                            )
-                                            .map((p) => (
-                                                <li key={p.id}>
-                                                    {p.name}{' '}
-                                                    {p.isHost ? '(Host)' : ''}:{' '}
-                                                    {Math.round(
-                                                        p.talkTimePercentage
-                                                    )}
-                                                    %
-                                                </li>
-                                            ))}
-                                    </ul>
-                                ) : (
-                                    <p>No active participants</p>
-                                )}
                             </div>
                         </>
                     )}

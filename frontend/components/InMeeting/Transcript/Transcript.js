@@ -17,9 +17,15 @@ export const Transcript = ({ transcript }) => {
         }
 
         if (utterance.is_final || isLast) {
-            finalTranscript[finalTranscript.length - 1].text.push(
-                ...utterance.words.map((i) => i.text)
-            );
+            const nonEmptyWords = utterance.words
+                .map((i) => i.text.trim())
+                .filter((text) => text !== '');
+
+            if (nonEmptyWords.length > 0) {
+                finalTranscript[finalTranscript.length - 1].text.push(
+                    ...nonEmptyWords
+                );
+            }
             continue;
         }
     }
@@ -33,14 +39,16 @@ export const Transcript = ({ transcript }) => {
 
     return (
         <div ref={ref} className="InMeeting-transcript">
-            {finalTranscript.map((item, index) => (
-                <p key={index}>
-                    <span className="InMeeting-transcript-speaker">
-                        {item.speaker || 'Unknown'}:
-                    </span>
-                    <span>{item.text.join(' ')}</span>
-                </p>
-            ))}
+            {finalTranscript
+                .filter((item) => item.text.length > 0) // Filter out items with empty text
+                .map((item, index) => (
+                    <p key={index}>
+                        <span className="InMeeting-transcript-speaker">
+                            {item.speaker || 'Unknown'}:
+                        </span>
+                        <span>{item.text.join(' ')}</span>
+                    </p>
+                ))}
         </div>
     );
 };
