@@ -247,7 +247,7 @@ button[onClick="clearBots"]:hover {
     padding: 1rem;
     background-color: #f5f5f7;
     border-radius: 8px;
-    max-height: 300px;
+    max-height: 360px;
     overflow-y: auto;
 }
 
