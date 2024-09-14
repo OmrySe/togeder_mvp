@@ -299,6 +299,8 @@ Assistant:`,
     decisions: 'What decisions were made in the meeting?',
     next_steps: 'What are the next steps?',
     key_takeaways: 'What are the key takeaways?',
+    participant_opinions:
+        'What are the participants opinions? summarize each one in one sentence.',
 };
 
 /*
