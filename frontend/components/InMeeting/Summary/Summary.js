@@ -27,9 +27,7 @@ export const Summary = ({ transcript = [], botId, onSummarize }) => {
                 <option value="general_summary">Summarize this meeting</option>
                 <option value="action_items">Generate action items</option>
                 <option value="decisions">Outline decisions made</option>
-                <option value="participant_opinions">
-                    Summarize participant opinions
-                </option>
+                <option value="next_steps">Highlight next steps</option>
                 <option value="key_takeaways">Find key takeaways</option>
             </select>
             <button

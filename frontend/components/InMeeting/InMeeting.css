@@ -135,18 +135,14 @@ button:disabled {
     background-color: #ff3b30;
 }
 
-/* Updated style for the "Clear All Bots" button */
+/* Add this new style for the "Clear All Bots" button */
 button[onClick="clearBots"] {
-    background-color: #e0e0e0; /* Light gray color */
-    color: #6e6e6e; /* Darker gray text for less emphasis */
-    border: 1px solid #d2d2d7; /* Light border */
-    cursor: default; /* Change cursor to default */
+    background-color: #ffcccb; /* Light red color */
+    color: #1d1d1f; /* Dark text for better contrast */
 }
 
 button[onClick="clearBots"]:hover {
-    background-color: #e0e0e0; /* No change on hover */
-    transform: none; /* Remove hover effect */
-    box-shadow: none; /* Remove hover shadow */
+    background-color: #ffa8a7; /* Slightly darker on hover */
 }
 
 .InMeeting-content {
@@ -247,7 +243,7 @@ button[onClick="clearBots"]:hover {
     padding: 1rem;
     background-color: #f5f5f7;
     border-radius: 8px;
-    max-height: 360px;
+    max-height: 300px;
     overflow-y: auto;
 }
 

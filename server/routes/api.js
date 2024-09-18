@@ -297,8 +297,7 @@ Assistant:`,
     general_summary: 'Can you summarize the meeting? Please be concise.',
     action_items: 'What are the action items from the meeting?',
     decisions: 'What decisions were made in the meeting?',
-    participant_opinions:
-        'What are the participants opinions? summarize each one in one sentence.',
+    next_steps: 'What are the next steps?',
     key_takeaways: 'What are the key takeaways?',
 };
 
