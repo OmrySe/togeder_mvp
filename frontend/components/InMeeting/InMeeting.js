@@ -75,13 +75,12 @@ function InMeeting() {
         }));
     };
 
-    const summarizeTranscript = async (botId, prompt, customPrompt) => {
+    const summarizeTranscript = async (botId, prompt) => {
         const res = await appFetch('/api/summarize', {
             method: 'POST',
             body: JSON.stringify({
                 botId: botId,
                 prompt: prompt,
-                customPrompt: customPrompt,
             }),
         });
 
@@ -95,6 +94,14 @@ function InMeeting() {
             return data.summary;
         } else {
             throw new Error('Failed to generate summary');
+        }
+    };
+
+    const clearBots = async () => {
+        const res = await appFetch('/api/clear-bots', { method: 'POST' });
+        if (res.status <= 299) {
+            setBotData([]);
+            setTotalBots(0);
         }
     };
 
@@ -145,6 +152,7 @@ function InMeeting() {
                 </button>
                 <div>Total Bots: {totalBots}</div>
                 <div>Recording State: {recordingState}</div>
+                <button onClick={clearBots}>Clear All Bots</button>
                 <button onClick={resetBots}>Reset All Bots</button>
             </div>
 

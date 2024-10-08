@@ -297,9 +297,8 @@ Assistant:`,
     general_summary: 'Can you summarize the meeting? Please be concise.',
     action_items: 'What are the action items from the meeting?',
     decisions: 'What decisions were made in the meeting?',
-    participants_opinions:
-        'What are every participant opinion on the subject in the meeting?',
-    ask_anything: '{{customPrompt}}', // customPrompt is a variable that will be replaced with the custom prompt from the user
+    next_steps: 'What are the next steps?',
+    key_takeaways: 'What are the key takeaways?',
 };
 
 /*
@@ -310,16 +309,10 @@ router.post('/summarize', session, async (req, res, next) => {
         sanitize(req);
         validateAppContext(req);
 
-        const { botId, prompt, customPrompt } = req.body;
-        console.log('Received summarize request:', {
-            botId,
-            prompt,
-            customPrompt,
-        });
+        const { botId, prompt } = req.body;
 
         if (!botId || !prompt) {
             return res.status(400).json({ error: 'Missing botId or prompt' });
-            // console.log('Received summarize request:', { botId, prompt, customPrompt });
         }
 
         const transcript = db.transcripts[botId] || [];
@@ -332,21 +325,9 @@ router.post('/summarize', session, async (req, res, next) => {
                         .join(' ')}`
             )
             .join('\n');
-
-        let promptText = PROMPTS[prompt];
-        if (prompt === 'ask_anything') {
-            if (!customPrompt) {
-                console.log('Missing custom prompt for ask_anything');
-                return res
-                    .status(400)
-                    .json({ error: 'Missing custom prompt for ask_anything' });
-            }
-            promptText = customPrompt;
-        }
-
         const completePrompt = PROMPTS._template
             .replace('{{transcript}}', finalTranscript)
-            .replace('{{prompt}}', promptText);
+            .replace('{{prompt}}', PROMPTS[prompt]);
 
         console.log('completePrompt', completePrompt);
 
@@ -359,13 +340,25 @@ router.post('/summarize', session, async (req, res, next) => {
             }),
         });
 
-        console.log('Anthropic response:', data);
-
         return res.json({
             summary: data.content[0].text,
         });
     } catch (e) {
-        console.error('Error in /summarize:', e);
+        next(handleError(e));
+    }
+});
+
+router.post('/clear-bots', session, async (req, res, next) => {
+    try {
+        sanitize(req);
+        validateAppContext(req);
+
+        // Clear bot data from the database
+        db.transcripts = {};
+        req.session.botIds = [];
+
+        res.json({ success: true });
+    } catch (e) {
         next(handleError(e));
     }
 });

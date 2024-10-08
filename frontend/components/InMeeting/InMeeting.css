@@ -84,7 +84,6 @@
     background-color: #ffffff;
     border-bottom: 1px solid #d2d2d7;
     gap: 1rem;
-    position: relative; 
 }
 
 .bot-control {
@@ -134,6 +133,16 @@ button:disabled {
 
 .stop-recording-button {
     background-color: #ff3b30;
+}
+
+/* Add this new style for the "Clear All Bots" button */
+button[onClick="clearBots"] {
+    background-color: #ffcccb; /* Light red color */
+    color: #1d1d1f; /* Dark text for better contrast */
+}
+
+button[onClick="clearBots"]:hover {
+    background-color: #ffa8a7; /* Slightly darker on hover */
 }
 
 .InMeeting-content {

@@ -6,18 +6,11 @@ export const Summary = ({ transcript = [], botId, onSummarize }) => {
     const [summaryState, setSummaryState] = useState('none');
     const [prompt, setPrompt] = useState('general_summary');
     const [summary, setSummary] = useState('');
-    const [customPrompt, setCustomPrompt] = useState(''); // New state for custom prompt
 
     const generateSummary = async () => {
         setSummaryState('summarising');
         try {
-            console.log('Generating summary with:', {
-                botId,
-                prompt,
-                customPrompt,
-            });
-            const newSummary = await onSummarize(botId, prompt, customPrompt);
-            console.log('Received summary:', newSummary);
+            const newSummary = await onSummarize(botId, prompt);
             setSummary(newSummary);
             setSummaryState('none');
         } catch (error) {
@@ -34,26 +27,14 @@ export const Summary = ({ transcript = [], botId, onSummarize }) => {
                 <option value="general_summary">Summarize this meeting</option>
                 <option value="action_items">Generate action items</option>
                 <option value="decisions">Outline decisions made</option>
-                <option value="participants_opinions">
-                    See participants opinions
-                </option>
-                <option value="ask_anything">Ask anything</option>
+                <option value="next_steps">Highlight next steps</option>
+                <option value="key_takeaways">Find key takeaways</option>
             </select>
-            {/* if prompt is ask_anything, show input field for custom prompt */}
-            {prompt === 'ask_anything' && (
-                <input
-                    type="text"
-                    value={customPrompt}
-                    onChange={(e) => setCustomPrompt(e.target.value)}
-                    placeholder="Enter your question..."
-                />
-            )}
             <button
                 onClick={generateSummary}
                 disabled={
                     transcript.length === 0 ||
-                    ['summarising', 'error'].includes(summaryState) ||
-                    (prompt === 'ask_anything' && !customPrompt.trim()) // Disable if 'ask_anything' is selected and customPrompt is empty
+                    ['summarising', 'error'].includes(summaryState)
                 }
             >
                 {summaryState === 'none' && 'Ask AI'}

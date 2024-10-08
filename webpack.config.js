@@ -54,7 +54,7 @@ module.exports = [
                 'X-Content-Type-Options': 'nosniff',
                 'Referrer-Policy': 'same-origin',
             },
-            allowedHosts: 'all', // ['.ngrok.io', '.ngrok-free.app'],
+            allowedHosts: ['.ngrok.io', '.ngrok-free.app'],
             hot: true,
             client: {
                 overlay: {
